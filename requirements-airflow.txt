@@ -1,7 +1,0 @@
-pandas
-pyarrow
-requests
-beautifulsoup4
-lxml
-python-dotenv
-psycopg2-binary
