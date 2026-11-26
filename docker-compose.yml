@@ -1,9 +1,7 @@
 services:
   postgres:
-    image: pgvector/pgvector:pg16
-    # PostgreSQL 16 plus the pgvector extension (used in Lab 8)
-    command: ["postgres", "-c", "wal_level=logical"]
-    # Switches on change data capture (Step 6)
+    image: pgvector/pgvector:pg16      # PostgreSQL 16 plus the pgvector extension (used in Lab 8)
+    command: ["postgres", "-c", "wal_level=logical"]   # switches on change data capture (Lab 3)
     container_name: kedai-postgres
     environment:
       POSTGRES_USER: ${PG_USER}
@@ -29,6 +27,24 @@ services:
       - "19000:9000"
     volumes:
       - s3data:/data
+
+  airflow:
+    build: .                           # builds the image from Dockerfile
+    container_name: kedai-airflow
+    command: standalone                # all of Airflow in one container, fine for learning
+    user: "${AIRFLOW_UID:-50000}:0"
+    env_file: .env
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DEFAULT_TIMEZONE: Asia/Kuala_Lumpur
+      PG_HOST: postgres                # inside Docker, the database is found by its service name
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./:/opt/airflow/project
+    depends_on:
+      - postgres
 
 volumes:
   pgdata:
